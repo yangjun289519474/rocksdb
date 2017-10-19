@@ -8,12 +8,16 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 #pragma once
 
+//yangjun #include的两种表示方式
+
 #include <string>
 
 #include "cache/sharded_cache.h"
 
 #include "port/port.h"
 #include "util/autovector.h"
+
+//yangjun namespace是否有作用域，关键字namespace
 
 namespace rocksdb {
 
@@ -42,6 +46,8 @@ namespace rocksdb {
 // that any successful LRUCacheShard::Lookup/LRUCacheShard::Insert have a
 // matching
 // RUCache::Release (to move into state 2) or LRUCacheShard::Erase (for state 3)
+
+//yangjun struct 和 class有什么区别
 
 struct LRUHandle {
   void* value;
@@ -117,14 +123,19 @@ struct LRUHandle {
 // we have tested.  E.g., readrandom speeds up by ~5% over the g++
 // 4.4.3's builtin hashtable.
 class LRUHandleTable {
+
+//yangjun 构造函数和析构函数定义，怎么实现呢？
+
  public:
   LRUHandleTable();
   ~LRUHandleTable();
 
+//yangjun，key作为函数入参，被引用
   LRUHandle* Lookup(const Slice& key, uint32_t hash);
   LRUHandle* Insert(LRUHandle* h);
   LRUHandle* Remove(const Slice& key, uint32_t hash);
 
+//yangjun，怎么定义模板
   template <typename T>
   void ApplyToAllCacheEntries(T func) {
     for (uint32_t i = 0; i < length_; i++) {
@@ -137,6 +148,8 @@ class LRUHandleTable {
       }
     }
   }
+
+//yangjun 私有变量
 
  private:
   // Return a pointer to slot that points to a cache entry that
@@ -154,14 +167,21 @@ class LRUHandleTable {
 };
 
 // A single shard of sharded cache.
+
+//yangjun，类的继承，子类和父类
 class ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard : public CacheShard {
  public:
   LRUCacheShard();
+
+  //yangjun 为什么有些构造函数是虚函数
   virtual ~LRUCacheShard();
 
   // Separate from constructor so caller can easily make an array of LRUCache
   // if current usage is more than new capacity, the function will attempt to
   // free the needed space
+
+  //yangjun 虚函数定义，干什么用的。
+  //yangjun override在虚函数后面表示什么
   virtual void SetCapacity(size_t capacity) override;
 
   // Set the flag to reject insertion if cache if full.
@@ -279,10 +299,13 @@ class ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard : public CacheShard {
 };
 
 class LRUCache : public ShardedCache {
+
+ //yangjun 构造函数没有返回值，析构函数没有入参
  public:
   LRUCache(size_t capacity, int num_shard_bits, bool strict_capacity_limit,
            double high_pri_pool_ratio);
   virtual ~LRUCache();
+  
   virtual const char* Name() const override { return "LRUCache"; }
   virtual CacheShard* GetShard(int shard) override;
   virtual const CacheShard* GetShard(int shard) const override;
